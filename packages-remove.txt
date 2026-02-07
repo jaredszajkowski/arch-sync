@@ -1,0 +1,14 @@
+vi
+gnome-terminal
+vlc
+vlc-plugins-all
+eog
+evince
+sushi
+apostrophe
+rhythmbox
+gnome-calendar
+gnome-contacts
+gnome-terminal
+gnome-photos
+gedit
