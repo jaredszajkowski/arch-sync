@@ -4,20 +4,23 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PACKAGE_LIST="${SCRIPT_DIR}/packages.txt"
-AUR_PACKAGE_LIST="${SCRIPT_DIR}/packages-aur.txt"
+PACKAGE_LIST="${SCRIPT_DIR}/packages-install.txt"
+AUR_PACKAGE_LIST="${SCRIPT_DIR}/packages-aur-install.txt"
 REMOVE_LIST="${SCRIPT_DIR}/packages-remove.txt"
+REMOVE_DIRS="${SCRIPT_DIR}/directories-remove.txt"
 MIRROR_LIST="${SCRIPT_DIR}/mirrorlist"
 
 # Colors for output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m'
 
 log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
+log_prompt() { echo -e "${BLUE}[PROMPT]${NC} $1"; }
 
 # Check if running as root
 if [[ $EUID -eq 0 ]]; then
@@ -33,6 +36,51 @@ sync_mirrors() {
         log_info "Mirrorlist updated"
     else
         log_warn "Mirrorlist file not found: $MIRROR_LIST"
+    fi
+}
+
+# Remove directories
+remove_directories() {
+    if [[ ! -f "$REMOVE_DIRS" ]] || [[ ! -s "$REMOVE_DIRS" ]]; then
+        log_info "No directories to remove"
+        return
+    fi
+    
+    log_info "Checking directories to remove..."
+    local to_remove=()
+    while IFS= read -r dir || [[ -n "$dir" ]]; do
+        # Skip comments and empty lines
+        if [[ "$dir" =~ ^#.*$ ]] || [[ -z "$dir" ]]; then
+            continue
+        fi
+        
+        # Expand tilde to home directory
+        dir="${dir/#\~/$HOME}"
+        
+        if [[ -d "$dir" ]] || [[ -f "$dir" ]]; then
+            to_remove+=("$dir")
+        fi
+    done < "$REMOVE_DIRS"
+    
+    if [[ ${#to_remove[@]} -gt 0 ]]; then
+        log_warn "The following directories/files will be removed:"
+        for dir in "${to_remove[@]}"; do
+            echo "  - $dir"
+        done
+        
+        log_prompt "Do you want to proceed? (y/N): "
+        read -r response
+        if [[ "$response" =~ ^[Yy]$ ]]; then
+            for dir in "${to_remove[@]}"; do
+                log_info "Removing: $dir"
+                rm -rf "$dir"
+            done
+            log_info "Directory removal complete"
+        else
+            log_info "Directory removal skipped"
+        fi
+    else
+        log_info "No directories need to be removed"
     fi
 }
 
@@ -136,6 +184,9 @@ main() {
     
     # Sync mirrorlist first
     sync_mirrors
+    
+    # Remove directories (before package removal)
+    remove_directories
     
     # Remove unwanted packages
     remove_packages
