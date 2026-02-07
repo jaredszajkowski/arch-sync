@@ -44,7 +44,7 @@ chmod +x arch-sync.sh
 
 * `packages-install.txt`: A list of packages to be installed using `pacman`.
 * `packages-aur-install.txt`: A list of AUR packages to be installed using `yay`.
-* `packages-remove.txt`: A list of packages to be removed. 1 package per line.
+* `packages-remove.txt`: A list of packages to be removed.
 * `directories-remove.txt`: A list of directories and files to be removed.
 * `mirrorlist`: Custom mirrorlist for pacman.
 
