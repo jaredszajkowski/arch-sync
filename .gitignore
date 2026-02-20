@@ -1,8 +1,1 @@
 logos/
-
-# Configuration files
-mirrorlist
-packages-install.txt
-packages-remove.txt
-packages-aur-install.txt
-directories-remove.txt
