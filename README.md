@@ -2,15 +2,15 @@
 
 ## Description
 
-This is a template repository for syncing Arch Linux packages and configurations across multiple machines. It includes a script to automate the installation and removal of packages, as well as the synchronization of configuration files.
+This is a template repository for syncing Arch Linux packages and configurations across multiple machines. It includes a script to automate the installation and removal of packages, the synchronization of configuration files, and the synchronization of the `.claude` configuration.
 
 ## Requirements
 
 There is a short list of requirements for using this repository:
 
 * Arch Linux installed on your machines.
-* `git` installed to clone the repository.
-* `yay` installed for managing AUR packages.
+* `git` installed to clone the repository and pull/push changes.
+* `yay` installed for managing AUR (Arch User Repository) packages.
 
 I personally use `yay` for *most* of my AUR package management, but you can modify the script to use your preferred AUR helper if needed.
 
@@ -22,10 +22,10 @@ You can use this repository as a starting point for your own Arch Linux setup. S
 
 1. Fork the repository to your own GitLab account.
 
-2. Clone the repository (ideally) to a cloud storage service (synced locally) that you can access from all your machines, such as Dropbox, Google Drive, or OneDrive:
+2. Clone the repository:
 
 ```bash
-git clone https://gitlab.com/jaredszajkowski/arch-sync.git
+$ git clone https://gitlab.com/username/arch-sync.git
 ```
 
 3. Edit the configuration files to include the packages and configurations you want to manage, including `packages-install.txt`, `packages-aur-install.txt`, `packages-remove.txt`, `directories-remove.txt`, and `mirrorlist`.
@@ -33,12 +33,20 @@ git clone https://gitlab.com/jaredszajkowski/arch-sync.git
 4. Run the synchronization script:
 
 ```bash
-cd arch-sync
-chmod +x arch-sync.sh
-./arch-sync.sh
+$ cd arch-sync
+$ chmod +x arch-sync.sh
+$ ./arch-sync.sh
 ```
 
-5. The script will read the package lists and configuration files, install or remove packages as needed, and synchronize your configuration. If the package lists or configuration files have changed since the last run, it will apply the necessary changes to your system. If there are no changes or the changes have already been applied, it will simply exit without making any modifications.
+The script will read the package lists and configuration files, install or remove packages as needed, and synchronize your configuration. If the package lists or configuration files have changed since the last run, it will apply the necessary changes to your system. If there are no changes or the changes have already been applied, it will simply exit without making any modifications.
+
+5. Commit and push your changes to your forked repository:
+
+```bash
+$ git add .
+$ git commit -m "Update package lists and configurations"
+$ git push
+```
 
 ## Configuration Files
 
