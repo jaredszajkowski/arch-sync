@@ -185,11 +185,11 @@ main() {
     # Sync mirrorlist first
     sync_mirrors
     
-    # Remove directories (before package removal)
-    remove_directories
-    
     # Remove unwanted packages
     remove_packages
+
+    # Remove directories
+    remove_directories
     
     # Install official packages
     install_packages
