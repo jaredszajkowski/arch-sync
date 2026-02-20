@@ -2,7 +2,7 @@
 
 ## Description
 
-This is a template repository for syncing Arch Linux packages and configurations across multiple machines. It includes a script to automate the installation and removal of packages, the synchronization of configuration files, and the synchronization of the `.claude` configuration.
+This is a template repository for syncing Arch Linux packages and configurations across multiple machines. It includes a script to automate the installation and removal of packages and the synchronization of configuration files.
 
 ## Requirements
 
