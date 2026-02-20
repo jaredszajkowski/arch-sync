@@ -12,3 +12,6 @@ gnome-contacts
 gnome-terminal
 gnome-photos
 gedit
+gnome-remote-desktop
+clutter-gtk
+cheese

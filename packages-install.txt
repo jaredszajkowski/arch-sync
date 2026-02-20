@@ -5,3 +5,4 @@ decibels
 loupe
 showtime
 video-trimmer
+resources
