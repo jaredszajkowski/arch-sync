@@ -2,7 +2,7 @@
 
 ## Description
 
-This is a template repository for syncing Arch Linux packages and configurations across multiple machines. It includes a script to automate the installation and removal of packages and the synchronization of configuration files.
+This is a template repository for syncing packages and configurations across multiple Arch Linux installations. It includes a script to automate the installation and removal of packages and the synchronization of configuration files.
 
 ## Requirements
 
