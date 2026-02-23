@@ -1,8 +1,0 @@
-gnome-console
-gnome-text-editor
-papers
-decibels
-loupe
-showtime
-video-trimmer
-resources
