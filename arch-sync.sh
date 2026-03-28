@@ -100,7 +100,7 @@ remove_packages() {
         fi
         
         # Check with yay (works for both official and AUR)
-        if yay -Qq "$pkg" &>/dev/null; then
+        if pacman -Qi "$pkg" &>/dev/null; then
             to_remove+=("$pkg")
         fi
     done < "$REMOVE_LIST"
