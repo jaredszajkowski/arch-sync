@@ -107,7 +107,11 @@ remove_packages() {
     
     if [[ ${#to_remove[@]} -gt 0 ]]; then
         log_info "Removing packages: ${to_remove[*]}"
-        yay -Rns --noconfirm "${to_remove[@]}"
+        for pkg in "${to_remove[@]}"; do
+            if ! yay -Rns --noconfirm "$pkg"; then
+                log_warn "Failed to remove $pkg (may already be removed or not found), skipping..."
+            fi
+        done
     else
         log_info "No packages need to be removed"
     fi
