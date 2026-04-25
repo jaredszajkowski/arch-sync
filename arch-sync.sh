@@ -4,6 +4,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+CURRENT_HOST=$HOSTNAME
 PACKAGE_LIST="${SCRIPT_DIR}/packages-install.txt"
 AUR_PACKAGE_LIST="${SCRIPT_DIR}/packages-aur-install.txt"
 REMOVE_LIST="${SCRIPT_DIR}/packages-remove.txt"
@@ -21,6 +22,51 @@ log_info() { echo -e "${GREEN}[INFO]${NC} $1"; }
 log_warn() { echo -e "${YELLOW}[WARN]${NC} $1"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $1"; }
 log_prompt() { echo -e "${BLUE}[PROMPT]${NC} $1"; }
+
+# Outputs the entry (package name or path) if the line applies to this host.
+# Lines with no @hostname tags apply to all hosts.
+# Returns 1 for blank lines, comments, and entries filtered by hostname.
+# Note: paths with embedded spaces are not supported when using @hostname tags.
+parse_entry() {
+    local line="$1"
+
+    # Skip blank lines and full-line comments
+    [[ -z "${line// }" || "$line" =~ ^[[:space:]]*# ]] && return 1
+
+    # Strip inline comment
+    local content="${line%%#*}"
+
+    # Split into entry words and @hostname tags
+    local entry="" tags=()
+    local word
+    for word in $content; do
+        if [[ "$word" == @* ]]; then
+            tags+=("${word:1}")
+        else
+            entry="$entry $word"
+        fi
+    done
+    entry="${entry# }"
+
+    [[ -z "$entry" ]] && return 1
+
+    # No tags → applies to all hosts
+    if [[ ${#tags[@]} -eq 0 ]]; then
+        echo "$entry"
+        return 0
+    fi
+
+    # Check if current host matches any tag
+    local tag
+    for tag in "${tags[@]}"; do
+        if [[ "$tag" == "$CURRENT_HOST" ]]; then
+            echo "$entry"
+            return 0
+        fi
+    done
+
+    return 1
+}
 
 # Check if running as root
 if [[ $EUID -eq 0 ]]; then
@@ -48,15 +94,12 @@ remove_directories() {
     
     log_info "Checking directories to remove..."
     local to_remove=()
-    while IFS= read -r dir || [[ -n "$dir" ]]; do
-        # Skip comments and empty lines
-        if [[ "$dir" =~ ^#.*$ ]] || [[ -z "$dir" ]]; then
-            continue
-        fi
-        
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        dir=$(parse_entry "$line") || continue
+
         # Expand tilde to home directory
         dir="${dir/#\~/$HOME}"
-        
+
         if [[ -d "$dir" ]] || [[ -f "$dir" ]]; then
             to_remove+=("$dir")
         fi
@@ -93,13 +136,9 @@ remove_packages() {
     
     log_info "Checking packages to remove..."
     local to_remove=()
-    while IFS= read -r pkg || [[ -n "$pkg" ]]; do
-        # Skip comments and empty lines
-        if [[ "$pkg" =~ ^#.*$ ]] || [[ -z "$pkg" ]]; then
-            continue
-        fi
-        
-        # Check with yay (works for both official and AUR)
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        pkg=$(parse_entry "$line") || continue
+
         if pacman -Qi "$pkg" &>/dev/null; then
             to_remove+=("$pkg")
         fi
@@ -126,12 +165,9 @@ install_packages() {
     
     log_info "Checking official packages to install..."
     local to_install=()
-    while IFS= read -r pkg || [[ -n "$pkg" ]]; do
-        # Skip comments and empty lines
-        if [[ "$pkg" =~ ^#.*$ ]] || [[ -z "$pkg" ]]; then
-            continue
-        fi
-        
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        pkg=$(parse_entry "$line") || continue
+
         if ! pacman -Qq "$pkg" &>/dev/null; then
             to_install+=("$pkg")
         fi
@@ -159,12 +195,9 @@ install_aur_packages() {
     
     log_info "Checking AUR packages to install..."
     local to_install=()
-    while IFS= read -r pkg || [[ -n "$pkg" ]]; do
-        # Skip comments and empty lines
-        if [[ "$pkg" =~ ^#.*$ ]] || [[ -z "$pkg" ]]; then
-            continue
-        fi
-        
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        pkg=$(parse_entry "$line") || continue
+
         if ! yay -Qq "$pkg" &>/dev/null; then
             to_install+=("$pkg")
         fi
