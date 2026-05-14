@@ -28,7 +28,7 @@ You can use this repository as a starting point for your own Arch Linux setup. S
 $ git clone https://gitlab.com/username/arch-sync.git
 ```
 
-3. Edit the configuration files to include the packages and configurations you want to manage, including `packages-install.txt`, `packages-aur-install.txt`, `packages-remove.txt`, `directories-remove.txt`, and `mirrorlist`.
+3. Edit the configuration files to include the packages and configurations you want to manage, including `packages-install.txt`, `packages-aur-install.txt`, `packages-remove.txt`, `directories-remove.txt`, `home-directories.txt`, and `mirrorlist`.
 
 4. Run the synchronization script:
 
@@ -54,9 +54,35 @@ $ git push
 * `packages-aur-install.txt`: A list of AUR packages to be installed using `yay`.
 * `packages-remove.txt`: A list of packages to be removed.
 * `directories-remove.txt`: A list of directories and files to be removed.
+* `home-directories.txt`: A list of home directory paths (relative to `$HOME`) to symlink into `~/Cloud_Storage/Dropbox`.
 * `mirrorlist`: Custom mirrorlist for pacman.
 
 Each of these files can be edited to include the packages (1 package per line) and Arch Linux configuration files you want to manage across your machines.
+
+## Home Directory Linking
+
+The `home-directories.txt` file lists directories relative to `$HOME` that should be symlinked into `~/Cloud_Storage/Dropbox`. This keeps important directories synced across machines via Dropbox (or any other sync folder).
+
+**How it works:**
+
+- Each line is a path relative to `$HOME` (no leading `~/`).
+- If the target directory already exists, it is renamed to `<dir>_old` before the symlink is created.
+- If the target is already a symlink, it is left as-is.
+- If `<dir>_old` already exists, the entry is skipped with a warning.
+- Supports `@hostname` tags to scope entries to specific machines.
+
+**Examples:**
+
+```
+# Link ~/.claude on all machines
+.claude
+
+# Link ~/Documents only on arbook
+Documents    @arbook
+
+# Link ~/.config/some-app on arbook and arpad
+.config/some-app    @arbook @arpad
+```
 
 ## Hostname-Based Filtering
 
