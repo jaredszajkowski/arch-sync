@@ -22,6 +22,7 @@ Prerequisites: `git`, `yay` (AUR helper). The script will error early if `yay` i
 | `packages-aur-install.txt` | AUR packages installed via `yay` |
 | `packages-remove.txt` | Packages to uninstall (checked with `pacman -Qi`, removed with `yay -Rns`) |
 | `directories-remove.txt` | Paths/directories to delete (prompts for confirmation; supports `~` expansion) |
+| `home-directories.txt` | Paths relative to `$HOME` to symlink into `~/Cloud_Storage/Dropbox` |
 | `mirrorlist` | Copied verbatim to `/etc/pacman.d/mirrorlist` |
 
 All list files support `#` comments and blank lines. One entry per line. Entries can be scoped to specific hostnames using `@hostname` tags (see below).
@@ -32,8 +33,9 @@ All list files support `#` comments and blank lines. One entry per line. Entries
 2. Copy `mirrorlist` → `/etc/pacman.d/mirrorlist`
 3. Remove listed packages (skips already-absent packages with a warning, does not abort)
 4. Remove listed directories (interactive confirmation)
-5. Install official packages (skips already-installed)
-6. Install AUR packages (skips already-installed)
+5. Link home directories to `~/Cloud_Storage/Dropbox` (creates symlinks; renames existing dirs to `<dir>_old`)
+6. Install official packages (skips already-installed)
+7. Install AUR packages (skips already-installed)
 
 ## Hostname-based filtering
 
