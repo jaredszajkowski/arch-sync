@@ -5,14 +5,15 @@ set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CURRENT_HOST=$HOSTNAME
-PACKAGE_LIST="${SCRIPT_DIR}/packages-install.txt"
-AUR_PACKAGE_LIST="${SCRIPT_DIR}/packages-aur-install.txt"
-REMOVE_LIST="${SCRIPT_DIR}/packages-remove.txt"
-REMOVE_DIRS="${SCRIPT_DIR}/directories-remove.txt"
-HOME_DIRS="${SCRIPT_DIR}/home-directories.txt"
-HOME_FILES="${SCRIPT_DIR}/home-files.txt"
-MIRROR_LIST="${SCRIPT_DIR}/mirrorlist"
-PACMAN_CONF="${SCRIPT_DIR}/pacman.conf"
+CONFIG_DIR="${SCRIPT_DIR}/config"
+PACKAGE_LIST="${CONFIG_DIR}/packages-install.txt"
+AUR_PACKAGE_LIST="${CONFIG_DIR}/packages-aur-install.txt"
+REMOVE_LIST="${CONFIG_DIR}/packages-remove.txt"
+REMOVE_DIRS="${CONFIG_DIR}/directories-remove.txt"
+HOME_DIRS="${CONFIG_DIR}/home-directories.txt"
+HOME_FILES="${CONFIG_DIR}/home-files.txt"
+MIRROR_LIST="${CONFIG_DIR}/mirrorlist"
+PACMAN_CONF="${CONFIG_DIR}/pacman.conf"
 SYNC_DIR="$HOME/Cloud_Storage/Dropbox"
 
 # Colors for output

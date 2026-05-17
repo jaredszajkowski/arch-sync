@@ -28,7 +28,14 @@ You can use this repository as a starting point for your own Arch Linux setup. S
 $ git clone https://gitlab.com/username/arch-sync.git
 ```
 
-3. Edit the configuration files to include the packages and configurations you want to manage, including `packages-install.txt`, `packages-aur-install.txt`, `packages-remove.txt`, `directories-remove.txt`, `home-directories.txt`, `home-files.txt`, `mirrorlist`, and `pacman.conf`.
+3. Copy the example files in `config/` to create your own configuration, then edit them to include the packages and configurations you want to manage:
+
+```bash
+$ cd arch-sync/config
+$ for f in *.example; do cp "$f" "${f%.example}"; done
+```
+
+The files to edit are `packages-install.txt`, `packages-aur-install.txt`, `packages-remove.txt`, `directories-remove.txt`, `home-directories.txt`, `home-files.txt`, `mirrorlist`, and `pacman.conf` — all located in `config/`.
 
 4. Run the synchronization script:
 
@@ -50,14 +57,16 @@ $ git push
 
 ## Configuration Files
 
-* `packages-install.txt`: A list of packages to be installed using `pacman`.
-* `packages-aur-install.txt`: A list of AUR packages to be installed using `yay`.
-* `packages-remove.txt`: A list of packages to be removed.
-* `directories-remove.txt`: A list of directories and files to be removed.
-* `home-directories.txt`: A list of home directory paths (relative to `$HOME`) to symlink into `~/Cloud_Storage/Dropbox`.
-* `home-files.txt`: A list of home file paths (relative to `$HOME`) to symlink into `~/Cloud_Storage/Dropbox`.
-* `mirrorlist`: Custom mirrorlist for pacman, copied verbatim to `/etc/pacman.d/mirrorlist`.
-* `pacman.conf`: Custom pacman configuration, copied verbatim to `/etc/pacman.conf`.
+All configuration files live in the `config/` directory. Each file has a corresponding `*.example` template to use as a starting point.
+
+* `config/packages-install.txt`: A list of packages to be installed using `pacman`.
+* `config/packages-aur-install.txt`: A list of AUR packages to be installed using `yay`.
+* `config/packages-remove.txt`: A list of packages to be removed.
+* `config/directories-remove.txt`: A list of directories and files to be removed.
+* `config/home-directories.txt`: A list of home directory paths (relative to `$HOME`) to symlink into `~/Cloud_Storage/Dropbox`.
+* `config/home-files.txt`: A list of home file paths (relative to `$HOME`) to symlink into `~/Cloud_Storage/Dropbox`.
+* `config/mirrorlist`: Custom mirrorlist for pacman, copied verbatim to `/etc/pacman.d/mirrorlist`.
+* `config/pacman.conf`: Custom pacman configuration, copied verbatim to `/etc/pacman.conf`.
 
 Each of these files can be edited to include the packages (1 package per line) and Arch Linux configuration files you want to manage across your machines.
 
