@@ -1,0 +1,9 @@
+# Configuration files
+directories-remove.txt
+home-directories.txt
+home-files.txt
+mirrorlist
+packages-aur-install.txt
+packages-install.txt
+packages-remove.txt
+pacman.conf
