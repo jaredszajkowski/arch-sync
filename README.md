@@ -28,7 +28,7 @@ You can use this repository as a starting point for your own Arch Linux setup. S
 $ git clone https://gitlab.com/username/arch-sync.git
 ```
 
-3. Edit the configuration files to include the packages and configurations you want to manage, including `packages-install.txt`, `packages-aur-install.txt`, `packages-remove.txt`, `directories-remove.txt`, `home-directories.txt`, and `mirrorlist`.
+3. Edit the configuration files to include the packages and configurations you want to manage, including `packages-install.txt`, `packages-aur-install.txt`, `packages-remove.txt`, `directories-remove.txt`, `home-directories.txt`, `home-files.txt`, `mirrorlist`, and `pacman.conf`.
 
 4. Run the synchronization script:
 
@@ -55,23 +55,27 @@ $ git push
 * `packages-remove.txt`: A list of packages to be removed.
 * `directories-remove.txt`: A list of directories and files to be removed.
 * `home-directories.txt`: A list of home directory paths (relative to `$HOME`) to symlink into `~/Cloud_Storage/Dropbox`.
-* `mirrorlist`: Custom mirrorlist for pacman.
+* `home-files.txt`: A list of home file paths (relative to `$HOME`) to symlink into `~/Cloud_Storage/Dropbox`.
+* `mirrorlist`: Custom mirrorlist for pacman, copied verbatim to `/etc/pacman.d/mirrorlist`.
+* `pacman.conf`: Custom pacman configuration, copied verbatim to `/etc/pacman.conf`.
 
 Each of these files can be edited to include the packages (1 package per line) and Arch Linux configuration files you want to manage across your machines.
 
-## Home Directory Linking
+## Home Directory and File Linking
 
-The `home-directories.txt` file lists directories relative to `$HOME` that should be symlinked into `~/Cloud_Storage/Dropbox`. This keeps important directories synced across machines via Dropbox (or any other sync folder).
+The `home-directories.txt` and `home-files.txt` files list paths relative to `$HOME` that should be symlinked into `~/Cloud_Storage/Dropbox`. This keeps important directories and dotfiles synced across machines via Dropbox (or any other sync folder).
 
 **How it works:**
 
 - Each line is a path relative to `$HOME` (no leading `~/`).
-- If the target directory already exists, it is renamed to `<dir>_old` before the symlink is created.
+- Use `home-directories.txt` for directories and `home-files.txt` for individual files.
+- If the target already exists, it is renamed to `<entry>_old` before the symlink is created. For files, the original content is first copied to the sync folder if it isn't already present there.
 - If the target is already a symlink, it is left as-is.
-- If `<dir>_old` already exists, the entry is skipped with a warning.
+- If `<entry>_old` already exists, the entry is skipped with a warning.
+- Parent directories within the sync folder are created automatically.
 - Supports `@hostname` tags to scope entries to specific machines.
 
-**Examples:**
+**Examples (`home-directories.txt`):**
 
 ```
 # Link ~/.claude on all machines
@@ -82,6 +86,16 @@ Documents    @arbook
 
 # Link ~/.config/some-app on arbook and arpad
 .config/some-app    @arbook @arpad
+```
+
+**Examples (`home-files.txt`):**
+
+```
+# Link ~/.claude.json on all machines
+.claude.json
+
+# Link ~/.gitconfig only on arbook
+.gitconfig    @arbook
 ```
 
 ## Hostname-Based Filtering

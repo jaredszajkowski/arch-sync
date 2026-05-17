@@ -22,8 +22,10 @@ Prerequisites: `git`, `yay` (AUR helper). The script will error early if `yay` i
 | `packages-aur-install.txt` | AUR packages installed via `yay` |
 | `packages-remove.txt` | Packages to uninstall (checked with `pacman -Qi`, removed with `yay -Rns`) |
 | `directories-remove.txt` | Paths/directories to delete (prompts for confirmation; supports `~` expansion) |
-| `home-directories.txt` | Paths relative to `$HOME` to symlink into `~/Cloud_Storage/Dropbox` |
+| `home-directories.txt` | Directory paths relative to `$HOME` to symlink into `~/Cloud_Storage/Dropbox` |
+| `home-files.txt` | File paths relative to `$HOME` to symlink into `~/Cloud_Storage/Dropbox` (copies existing file into sync target before linking) |
 | `mirrorlist` | Copied verbatim to `/etc/pacman.d/mirrorlist` |
+| `pacman.conf` | Copied verbatim to `/etc/pacman.conf` |
 
 All list files support `#` comments and blank lines. One entry per line. Entries can be scoped to specific hostnames using `@hostname` tags (see below).
 
@@ -31,11 +33,13 @@ All list files support `#` comments and blank lines. One entry per line. Entries
 
 1. `yay -Sy` — refresh package databases
 2. Copy `mirrorlist` → `/etc/pacman.d/mirrorlist`
-3. Remove listed packages (skips already-absent packages with a warning, does not abort)
-4. Remove listed directories (interactive confirmation)
-5. Link home directories to `~/Cloud_Storage/Dropbox` (creates symlinks; renames existing dirs to `<dir>_old`)
-6. Install official packages (skips already-installed)
-7. Install AUR packages (skips already-installed)
+3. Copy `pacman.conf` → `/etc/pacman.conf`
+4. Remove listed packages (skips already-absent packages with a warning, does not abort)
+5. Remove listed directories (interactive confirmation)
+6. Link home directories to `~/Cloud_Storage/Dropbox` (creates symlinks; renames existing dirs to `<dir>_old`)
+7. Link home files to `~/Cloud_Storage/Dropbox` (copies existing file into sync target if missing, then renames original to `<file>_old` and creates symlink)
+8. Install official packages (skips already-installed)
+9. Install AUR packages (skips already-installed)
 
 ## Hostname-based filtering
 
