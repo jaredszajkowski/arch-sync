@@ -1,0 +1,7 @@
+# Official repo packages to install via pacman
+# One entry per line
+# Supports @hostname tags to scope entries to specific machines
+#
+# Examples:
+#   firefox
+#   postgresql    @armini

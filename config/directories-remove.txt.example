@@ -1,0 +1,7 @@
+# Directories/paths to delete (prompts for confirmation before each)
+# One entry per line; supports ~ expansion
+# Supports @hostname tags to scope entries to specific machines
+#
+# Examples:
+#   ~/.config/old-app/
+#   ~/Documents/temp    @arbook

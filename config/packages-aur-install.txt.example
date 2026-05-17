@@ -1,0 +1,7 @@
+# AUR packages to install via yay
+# One entry per line
+# Supports @hostname tags to scope entries to specific machines
+#
+# Examples:
+#   pandoc-bin
+#   some-aur-pkg    @arbook

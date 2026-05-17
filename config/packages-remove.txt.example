@@ -1,0 +1,7 @@
+# Packages to uninstall via yay -Rns
+# One entry per line; skips already-absent packages with a warning
+# Supports @hostname tags to scope entries to specific machines
+#
+# Examples:
+#   gnome-terminal
+#   postgresql    @arbook @arpad

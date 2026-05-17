@@ -1,0 +1,8 @@
+# Home files to link to $SYNC_DIR (~/Cloud_Storage/Dropbox)
+# One entry per line, relative to $HOME (no leading ~/)
+# Supports @hostname tags to scope entries to specific machines
+#
+# Examples:
+#   .bashrc
+#   .gitconfig
+#   .config/some-app/config    @arbook
