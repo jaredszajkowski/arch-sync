@@ -10,7 +10,9 @@ AUR_PACKAGE_LIST="${SCRIPT_DIR}/packages-aur-install.txt"
 REMOVE_LIST="${SCRIPT_DIR}/packages-remove.txt"
 REMOVE_DIRS="${SCRIPT_DIR}/directories-remove.txt"
 HOME_DIRS="${SCRIPT_DIR}/home-directories.txt"
+HOME_FILES="${SCRIPT_DIR}/home-files.txt"
 MIRROR_LIST="${SCRIPT_DIR}/mirrorlist"
+PACMAN_CONF="${SCRIPT_DIR}/pacman.conf"
 SYNC_DIR="$HOME/Cloud_Storage/Dropbox"
 
 # Colors for output
@@ -84,6 +86,17 @@ sync_mirrors() {
         log_info "Mirrorlist updated"
     else
         log_warn "Mirrorlist file not found: $MIRROR_LIST"
+    fi
+}
+
+# Sync pacman.conf
+sync_pacman_conf() {
+    log_info "Syncing pacman.conf..."
+    if [[ -f "$PACMAN_CONF" ]]; then
+        sudo cp "$PACMAN_CONF" /etc/pacman.conf
+        log_info "pacman.conf updated"
+    else
+        log_warn "pacman.conf file not found: $PACMAN_CONF"
     fi
 }
 
@@ -161,6 +174,45 @@ link_home_directories() {
         ln -s "$sync_target" "$target"
         log_info "Linked ~/$entry -> $sync_target"
     done < "$HOME_DIRS"
+}
+
+# Link home files to SYNC_DIR
+link_home_files() {
+    if [[ ! -f "$HOME_FILES" ]] || [[ ! -s "$HOME_FILES" ]]; then
+        log_info "No home files to link"
+        return
+    fi
+
+    log_info "Linking home files to $SYNC_DIR..."
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        entry=$(parse_entry "$line") || continue
+
+        local target="$HOME/$entry"
+        local sync_target="$SYNC_DIR/$entry"
+
+        if [[ -L "$target" ]]; then
+            log_info "Already linked: ~/$entry"
+            continue
+        fi
+
+        if [[ -f "$target" ]]; then
+            if [[ -e "${target}_old" ]]; then
+                log_warn "Cannot rename ~/$entry — ~/${entry}_old already exists, skipping"
+                continue
+            fi
+            mkdir -p "$(dirname "$sync_target")"
+            if [[ ! -e "$sync_target" ]]; then
+                cp "$target" "$sync_target"
+            fi
+            mv "$target" "${target}_old"
+            log_info "Renamed ~/$entry to ~/${entry}_old"
+        else
+            mkdir -p "$(dirname "$sync_target")"
+        fi
+
+        ln -s "$sync_target" "$target"
+        log_info "Linked ~/$entry -> $sync_target"
+    done < "$HOME_FILES"
 }
 
 # Remove unwanted packages
@@ -257,6 +309,9 @@ main() {
     
     # Sync mirrorlist first
     sync_mirrors
+
+    # Sync pacman.conf
+    sync_pacman_conf
     
     # Remove unwanted packages
     remove_packages
@@ -266,6 +321,9 @@ main() {
 
     # Link home directories to sync folder
     link_home_directories
+
+    # Link home files to sync folder
+    link_home_files
 
     # Install official packages
     install_packages
