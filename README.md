@@ -20,12 +20,12 @@ You can use this repository as a starting point for your own Arch Linux setup. S
 
 ## Usage
 
-1. Fork the repository to your own GitLab account.
+1. Fork the repository to your own GitHub account.
 
 2. Clone the repository:
 
 ```bash
-$ git clone https://gitlab.com/username/arch-sync.git
+$ git clone https://github.com/username/arch-sync.git
 ```
 
 3. Copy the example files in `config/` to create your own configuration, then edit them to include the packages and configurations you want to manage:
