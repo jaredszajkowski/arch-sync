@@ -136,6 +136,22 @@ virtualbox      @arbook    # only on the main workstation
 
 The script detects the current machine's hostname at startup and automatically skips any entry whose tags don't match.
 
+## Deduplication
+
+Before acting on the package lists, the script automatically deduplicates entries in `packages-install.txt`, `packages-aur-install.txt`, and `packages-remove.txt`.
+
+**Rules:**
+
+- **Within-file**: if the same package name appears more than once in a file (untagged), all occurrences after the first are dropped. The first occurrence's inline comment is kept.
+- **Cross-file**: if an untagged package name appears in an install file *and* in `packages-remove.txt`, it is removed from the install file and kept only in the remove list.
+- **Tagged entries are skipped**: any entry carrying an `@hostname` tag is left untouched by both rules, preserving intentional splits like `postgresql @armini` (install on one host) alongside `postgresql @arbook @arpad` (remove on others).
+
+Dropped entries are reported with `[WARN]`.
+
+## Package List Sorting
+
+After each run, the script alphabetically sorts `packages-install.txt`, `packages-aur-install.txt`, and `packages-remove.txt`. The leading comment/blank header block is preserved, inline comments and `@hostname` tags stay attached to their entry, and blank lines within the body are dropped.
+
 ## License
 
 Licensed under the MIT License. See LICENSE for more information.

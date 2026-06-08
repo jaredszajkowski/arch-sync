@@ -73,6 +73,36 @@ parse_entry() {
     return 1
 }
 
+# Host-agnostic variant of parse_entry used for deduplication.
+# Echoes "<flag> <name>" where <flag> is 1 if the line carried any @hostname
+# tag (else 0) and <name> is the bare package name (inline comment and @tags
+# stripped), regardless of host. Output is captured via command substitution,
+# so the tag flag travels through stdout rather than a global.
+# Returns 1 for blank lines and full-line comments.
+entry_name() {
+    local line="$1"
+
+    # Skip blank lines and full-line comments
+    [[ -z "${line// }" || "$line" =~ ^[[:space:]]*# ]] && return 1
+
+    # Strip inline comment
+    local content="${line%%#*}"
+
+    local entry="" has_tags=0 word
+    for word in $content; do
+        if [[ "$word" == @* ]]; then
+            has_tags=1
+        else
+            entry="$entry $word"
+        fi
+    done
+    entry="${entry# }"
+
+    [[ -z "$entry" ]] && return 1
+
+    echo "$has_tags $entry"
+}
+
 # Check if running as root
 if [[ $EUID -eq 0 ]]; then
    log_error "This script should not be run as root. It will use sudo when needed."
@@ -300,6 +330,115 @@ install_aur_packages() {
     fi
 }
 
+# Remove within-file duplicate package names from a list file. Only untagged
+# entries are considered: the first occurrence of a name is kept (with its
+# inline comment), later untagged duplicates are dropped. Entries carrying an
+# @hostname tag, comments, and blank lines are preserved verbatim.
+dedupe_internal() {
+    local file="$1"
+    [[ -f "$file" ]] || return 0
+
+    local out=() seen=" "
+    local line parsed name
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        if parsed=$(entry_name "$line") && [[ "${parsed%% *}" == 0 ]]; then
+            name="${parsed#* }"
+            if [[ "$seen" == *" $name "* ]]; then
+                log_warn "Removing duplicate '$name' from $(basename "$file")"
+                continue
+            fi
+            seen="$seen$name "
+        fi
+        out+=("$line")
+    done < "$file"
+
+    if [[ ${#out[@]} -gt 0 ]]; then
+        printf '%s\n' "${out[@]}" > "$file"
+    fi
+}
+
+# Drop untagged package names from the install lists if the same name appears
+# untagged in the remove list. The package is kept only in the remove list.
+# Tagged entries on either side are left untouched.
+dedupe_install_against_remove() {
+    [[ -f "$REMOVE_LIST" ]] || return 0
+
+    # Collect untagged names present in the remove list
+    local remove_names=" " line parsed name
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        if parsed=$(entry_name "$line") && [[ "${parsed%% *}" == 0 ]]; then
+            remove_names="$remove_names${parsed#* } "
+        fi
+    done < "$REMOVE_LIST"
+
+    local file out=()
+    for file in "$PACKAGE_LIST" "$AUR_PACKAGE_LIST"; do
+        [[ -f "$file" ]] || continue
+        out=()
+        while IFS= read -r line || [[ -n "$line" ]]; do
+            if parsed=$(entry_name "$line") && [[ "${parsed%% *}" == 0 ]]; then
+                name="${parsed#* }"
+                if [[ "$remove_names" == *" $name "* ]]; then
+                    log_warn "'$name' is in the remove list — dropping from $(basename "$file")"
+                    continue
+                fi
+            fi
+            out+=("$line")
+        done < "$file"
+        if [[ ${#out[@]} -gt 0 ]]; then
+            printf '%s\n' "${out[@]}" > "$file"
+        fi
+    done
+}
+
+# Deduplicate package names within and across the list files
+dedupe_package_lists() {
+    log_info "Deduplicating package lists..."
+    dedupe_internal "$PACKAGE_LIST"
+    dedupe_internal "$AUR_PACKAGE_LIST"
+    dedupe_internal "$REMOVE_LIST"
+    dedupe_install_against_remove
+    log_info "Package lists deduplicated"
+}
+
+# Sort package names alphabetically in a list file, preserving the leading
+# comment/blank header block. Inline comments and @hostname tags stay
+# attached to their entry. Blank lines within the body are dropped.
+sort_list_file() {
+    local file="$1"
+    [[ -f "$file" ]] || return 0
+
+    local header=() entries=()
+    local in_header=1 line
+    while IFS= read -r line || [[ -n "$line" ]]; do
+        if [[ $in_header -eq 1 && ( -z "${line// }" || "$line" =~ ^[[:space:]]*# ) ]]; then
+            header+=("$line")
+        else
+            in_header=0
+            [[ -z "${line// }" ]] && continue
+            entries+=("$line")
+        fi
+    done < "$file"
+
+    {
+        if [[ ${#header[@]} -gt 0 ]]; then
+            printf '%s\n' "${header[@]}"
+        fi
+        if [[ ${#entries[@]} -gt 0 ]]; then
+            printf '%s\n' "${entries[@]}" | sort -f
+        fi
+    } > "$file"
+}
+
+# Sort the package list files alphabetically
+sort_package_lists() {
+    log_info "Sorting package lists alphabetically..."
+    sort_list_file "$PACKAGE_LIST"
+    sort_list_file "$AUR_PACKAGE_LIST"
+    sort_list_file "$REMOVE_LIST"
+    log_info "Package lists sorted"
+}
+
 # Main execution
 main() {
     log_info "Starting Arch Linux sync..."
@@ -313,7 +452,10 @@ main() {
 
     # Sync pacman.conf
     sync_pacman_conf
-    
+
+    # Deduplicate package lists before acting on them
+    dedupe_package_lists
+
     # Remove unwanted packages
     remove_packages
 
@@ -331,7 +473,10 @@ main() {
     
     # Install AUR packages
     install_aur_packages
-    
+
+    # Sort package lists alphabetically
+    sort_package_lists
+
     log_info "Sync complete!"
 }
 
