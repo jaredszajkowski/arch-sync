@@ -53,6 +53,37 @@ $ git commit -m "Update package lists and configurations"
 $ git push
 ```
 
+## Script structure
+
+`arch-sync.sh` is a thin orchestrator that runs a series of step scripts under
+`scripts/`, in order. Each step is a standalone, independently runnable script
+that shares common configuration and helpers via `scripts/common.sh` (sourced,
+not executed directly).
+
+This means you can run any single step on its own without running the full sync:
+
+```bash
+$ ./scripts/sort-package-lists.sh     # just re-sort the package lists
+$ ./scripts/install-packages.sh       # just install official packages
+$ ./scripts/link-home-files.sh        # just re-link home files
+```
+
+The steps, in the order `arch-sync.sh` runs them:
+
+| Step script | What it does |
+|---|---|
+| `update-databases.sh` | Refresh package databases (`yay -Sy`) |
+| `sync-mirrors.sh` | Copy `mirrorlist` → `/etc/pacman.d/mirrorlist` |
+| `sync-pacman-conf.sh` | Copy `pacman.conf` → `/etc/pacman.conf` |
+| `dedupe-package-lists.sh` | Deduplicate the package lists |
+| `remove-packages.sh` | Remove listed packages |
+| `remove-directories.sh` | Remove listed directories (interactive) |
+| `link-home-directories.sh` | Symlink home directories into the sync folder |
+| `link-home-files.sh` | Symlink home files into the sync folder |
+| `install-packages.sh` | Install official packages |
+| `install-aur-packages.sh` | Install AUR packages |
+| `sort-package-lists.sh` | Sort the package lists alphabetically |
+
 ## Configuration Files
 
 All configuration files live in the `config/` directory. Each file has a corresponding `*.example` template to use as a starting point.

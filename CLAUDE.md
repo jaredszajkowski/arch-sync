@@ -4,7 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-A personal Arch Linux configuration sync tool. The single script `arch-sync.sh` reads plain-text package lists and a mirrorlist, then idempotently applies them to the local system. It must be run as a non-root user (it calls `sudo` internally when needed).
+A personal Arch Linux configuration sync tool. It reads plain-text package lists and a mirrorlist, then idempotently applies them to the local system. It must be run as a non-root user (it calls `sudo` internally when needed).
+
+`arch-sync.sh` at the repo root is a thin orchestrator: it sources `scripts/common.sh` and then runs each step script under `scripts/` in order (as subprocesses). Each step is a standalone, independently runnable script — e.g. `./scripts/sort-package-lists.sh` re-sorts the lists without touching anything else.
 
 ## Running the script
 
@@ -12,7 +14,19 @@ A personal Arch Linux configuration sync tool. The single script `arch-sync.sh` 
 ./arch-sync.sh
 ```
 
+To run a single step on its own:
+
+```bash
+./scripts/<step>.sh   # e.g. ./scripts/install-packages.sh
+```
+
 Prerequisites: `git`, `yay` (AUR helper). The script will error early if `yay` is missing and AUR packages are listed.
+
+## Script layout
+
+- `arch-sync.sh` — orchestrator at the repo root; runs the step scripts in order.
+- `scripts/common.sh` — sourced library shared by every step: config-path variables, color/log helpers (`log_info` etc.), the entry parsers `parse_entry()` and `entry_name()`, and the non-root guard. Sourced, never executed directly.
+- `scripts/<step>.sh` — one script per step (see execution order below). Each sources `common.sh`, defines its function(s), and calls the function. Step-private helpers live with their step: `dedupe_internal`/`dedupe_install_against_remove` in `dedupe-package-lists.sh`, `sort_list_file` in `sort-package-lists.sh`.
 
 ## Configuration files
 
@@ -33,17 +47,19 @@ All list files support `#` comments and blank lines. One entry per line. Entries
 
 ## Script execution order
 
-1. `yay -Sy` — refresh package databases
-2. Copy `mirrorlist` → `/etc/pacman.d/mirrorlist`
-3. Copy `pacman.conf` → `/etc/pacman.conf`
-4. Deduplicate the package list files (see Deduplication below) — runs before removal/installation so the rest of the run acts on the cleaned lists
-5. Remove listed packages (skips already-absent packages with a warning, does not abort)
-6. Remove listed directories (interactive confirmation)
-7. Link home directories to `~/Cloud_Storage/Dropbox` (creates symlinks; renames existing dirs to `<dir>_old`)
-8. Link home files to `~/Cloud_Storage/Dropbox` (copies existing file into sync target if missing, then renames original to `<file>_old` and creates symlink)
-9. Install official packages (skips already-installed)
-10. Install AUR packages (skips already-installed)
-11. Sort the package list files alphabetically (`packages-install.txt`, `packages-aur-install.txt`, `packages-remove.txt`) — leading comment header is preserved; inline comments and `@hostname` tags stay attached to their entry; blank lines within the body are dropped
+`arch-sync.sh` runs these step scripts in this order:
+
+1. `update-databases.sh` — `yay -Sy` refreshes package databases
+2. `sync-mirrors.sh` — copy `mirrorlist` → `/etc/pacman.d/mirrorlist`
+3. `sync-pacman-conf.sh` — copy `pacman.conf` → `/etc/pacman.conf`
+4. `dedupe-package-lists.sh` — deduplicate the package list files (see Deduplication below) — runs before removal/installation so the rest of the run acts on the cleaned lists
+5. `remove-packages.sh` — remove listed packages (skips already-absent packages with a warning, does not abort)
+6. `remove-directories.sh` — remove listed directories (interactive confirmation)
+7. `link-home-directories.sh` — link home directories to `~/Cloud_Storage/Dropbox` (creates symlinks; renames existing dirs to `<dir>_old`)
+8. `link-home-files.sh` — link home files to `~/Cloud_Storage/Dropbox` (copies existing file into sync target if missing, then renames original to `<file>_old` and creates symlink)
+9. `install-packages.sh` — install official packages (skips already-installed)
+10. `install-aur-packages.sh` — install AUR packages (skips already-installed)
+11. `sort-package-lists.sh` — sort the package list files alphabetically (`packages-install.txt`, `packages-aur-install.txt`, `packages-remove.txt`) — leading comment header is preserved; inline comments and `@hostname` tags stay attached to their entry; blank lines within the body are dropped
 
 ## Hostname-based filtering
 
@@ -73,6 +89,6 @@ Dropped entries are reported with `[WARN]`. Comments and blank lines are preserv
 
 ## Key behaviors
 
-- `set -e` is active — unexpected errors abort the script.
+- `set -e` is active in every step script and in the orchestrator. Because the orchestrator runs steps as subprocesses, a step exiting non-zero aborts the whole run (matching the previous single-script behavior).
 - Package removal failures are logged as warnings and skipped rather than aborting (changed from earlier behavior that used `set -e` on removal).
 - A remove-list entry that resolves through another package's `Provides` (rather than being a real installed package) will pass the `pacman -Qi` guard but then fail `yay -Rns` with `error: target not found` and exit status 1. This surfaces as a `[WARN] Failed to remove ...` line; the script continues. This is **intentional** — the visible error is a flag to investigate the entry, not a bug. Do not "fix" the guard to match exact installed names (e.g. `grep -Fxq` against `pacman -Qq`), as that would silently drop the entry and suppress the signal. Example: `pandoc-cli` is provided by `pandoc-bin`, so listing `pandoc-cli` for removal warns every run unless the line is deleted.
