@@ -75,3 +75,4 @@ Dropped entries are reported with `[WARN]`. Comments and blank lines are preserv
 
 - `set -e` is active — unexpected errors abort the script.
 - Package removal failures are logged as warnings and skipped rather than aborting (changed from earlier behavior that used `set -e` on removal).
+- A remove-list entry that resolves through another package's `Provides` (rather than being a real installed package) will pass the `pacman -Qi` guard but then fail `yay -Rns` with `error: target not found` and exit status 1. This surfaces as a `[WARN] Failed to remove ...` line; the script continues. This is **intentional** — the visible error is a flag to investigate the entry, not a bug. Do not "fix" the guard to match exact installed names (e.g. `grep -Fxq` against `pacman -Qq`), as that would silently drop the entry and suppress the signal. Example: `pandoc-cli` is provided by `pandoc-bin`, so listing `pandoc-cli` for removal warns every run unless the line is deleted.
