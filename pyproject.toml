@@ -1,0 +1,24 @@
+[project]
+name = "arch-sync"
+version = "0.1.0"
+description = "Sync packages, mirrors, pacman.conf, and Dropbox-linked home files across Arch Linux machines"
+authors = [
+    { name = "Jared Szajkowski" },
+]
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.13"
+# arch-sync is pure Bash (arch-sync.sh + src/*.sh); no Python dependencies
+dependencies = []
+
+[project.urls]
+Repository = "https://github.com/jaredszajkowski/arch-sync"
+
+[tool.uv]
+# src/ is a flat directory of Bash step scripts, not an installable package
+package = false
+
+# Note: To ignore the .venv folder in Dropbox, run the following:
+# $ mkdir -p .venv
+# $ attr -s com.dropbox.ignored -V 1 .venv
