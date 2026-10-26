@@ -7,3 +7,9 @@ packages-aur-install.txt
 packages-install.txt
 packages-remove.txt
 pacman.conf
+
+# Ignore virtual environment folder
+.venv/
+
+# Ignore .claude directory
+.claude/
