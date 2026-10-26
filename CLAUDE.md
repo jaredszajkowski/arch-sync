@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A personal Arch Linux configuration sync tool. It reads plain-text package lists and a mirrorlist, then idempotently applies them to the local system. It must be run as a non-root user (it calls `sudo` internally when needed).
 
-`arch-sync.sh` at the repo root is a thin orchestrator: it sources `scripts/common.sh` and then runs each step script under `scripts/` in order (as subprocesses). Each step is a standalone, independently runnable script — e.g. `./scripts/sort-package-lists.sh` re-sorts the lists without touching anything else.
+`arch-sync.sh` at the repo root is a thin orchestrator: it sources `src/common.sh` and then runs each step script under `src/` in order (as subprocesses). Each step is a standalone, independently runnable script — e.g. `./src/sort-package-lists.sh` re-sorts the lists without touching anything else.
 
 ## Running the script
 
@@ -17,7 +17,7 @@ A personal Arch Linux configuration sync tool. It reads plain-text package lists
 To run a single step on its own:
 
 ```bash
-./scripts/<step>.sh   # e.g. ./scripts/install-packages.sh
+./src/<step>.sh   # e.g. ./src/install-packages.sh
 ```
 
 Prerequisites: `git`, `yay` (AUR helper). The script will error early if `yay` is missing and AUR packages are listed.
@@ -25,8 +25,8 @@ Prerequisites: `git`, `yay` (AUR helper). The script will error early if `yay` i
 ## Script layout
 
 - `arch-sync.sh` — orchestrator at the repo root; runs the step scripts in order.
-- `scripts/common.sh` — sourced library shared by every step: config-path variables, color/log helpers (`log_info` etc.), the entry parsers `parse_entry()` and `entry_name()`, and the non-root guard. Sourced, never executed directly.
-- `scripts/<step>.sh` — one script per step (see execution order below). Each sources `common.sh`, defines its function(s), and calls the function. Step-private helpers live with their step: `dedupe_internal`/`dedupe_install_against_remove` in `dedupe-package-lists.sh`, `sort_list_file` in `sort-package-lists.sh`.
+- `src/common.sh` — sourced library shared by every step: config-path variables, color/log helpers (`log_info` etc.), the entry parsers `parse_entry()` and `entry_name()`, and the non-root guard. Sourced, never executed directly.
+- `src/<step>.sh` — one script per step (see execution order below). Each sources `common.sh`, defines its function(s), and calls the function. Step-private helpers live with their step: `dedupe_internal`/`dedupe_install_against_remove` in `dedupe-package-lists.sh`, `sort_list_file` in `sort-package-lists.sh`.
 
 ## Configuration files
 

@@ -56,16 +56,16 @@ $ git push
 ## Script structure
 
 `arch-sync.sh` is a thin orchestrator that runs a series of step scripts under
-`scripts/`, in order. Each step is a standalone, independently runnable script
-that shares common configuration and helpers via `scripts/common.sh` (sourced,
+`src/`, in order. Each step is a standalone, independently runnable script
+that shares common configuration and helpers via `src/common.sh` (sourced,
 not executed directly).
 
 This means you can run any single step on its own without running the full sync:
 
 ```bash
-$ ./scripts/sort-package-lists.sh     # just re-sort the package lists
-$ ./scripts/install-packages.sh       # just install official packages
-$ ./scripts/link-home-files.sh        # just re-link home files
+$ ./src/sort-package-lists.sh     # just re-sort the package lists
+$ ./src/install-packages.sh       # just install official packages
+$ ./src/link-home-files.sh        # just re-link home files
 ```
 
 The steps, in the order `arch-sync.sh` runs them:
