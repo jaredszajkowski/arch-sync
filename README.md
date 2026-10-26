@@ -14,7 +14,7 @@ I personally use `yay` for *most* of my AUR package management, but you can modi
 
 ## Installation
 
-You can use this repository as a starting point for your own Arch Linux setup. Simply clone the repository, customize the package lists and configuration files to your liking, and run the `arch-sync.sh` script to apply the changes to your system.
+You can use this repository as a starting point for your own Arch Linux setup. Simply clone the repository, customize the package lists and configuration files to your liking, and run the `src/arch-sync.sh` script to apply the changes to your system.
 
 ## Usage
 
@@ -39,8 +39,8 @@ The files to edit are `packages-install.txt`, `packages-aur-install.txt`, `packa
 
 ```bash
 $ cd arch-sync
-$ chmod +x arch-sync.sh
-$ ./arch-sync.sh
+$ chmod +x src/*.sh
+$ ./src/arch-sync.sh
 ```
 
 The script will read the package lists and configuration files, install or remove packages as needed, and synchronize your configuration. If the package lists or configuration files have changed since the last run, it will apply the necessary changes to your system. If there are no changes or the changes have already been applied, it will simply exit without making any modifications.
@@ -55,8 +55,8 @@ $ git push
 
 ## Script structure
 
-`arch-sync.sh` is a thin orchestrator that runs a series of step scripts under
-`src/`, in order. Each step is a standalone, independently runnable script
+`src/arch-sync.sh` is a thin orchestrator that runs a series of step scripts
+alongside it in `src/`, in order. Each step is a standalone, independently runnable script
 that shares common configuration and helpers via `src/common.sh` (sourced,
 not executed directly).
 
@@ -68,7 +68,7 @@ $ ./src/install-packages.sh       # just install official packages
 $ ./src/link-home-files.sh        # just re-link home files
 ```
 
-The steps, in the order `arch-sync.sh` runs them:
+The steps, in the order `src/arch-sync.sh` runs them:
 
 | Step script | What it does |
 |---|---|

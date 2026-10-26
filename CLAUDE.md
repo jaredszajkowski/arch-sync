@@ -6,12 +6,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 A personal Arch Linux configuration sync tool. It reads plain-text package lists and a mirrorlist, then idempotently applies them to the local system. It must be run as a non-root user (it calls `sudo` internally when needed).
 
-`arch-sync.sh` at the repo root is a thin orchestrator: it sources `src/common.sh` and then runs each step script under `src/` in order (as subprocesses). Each step is a standalone, independently runnable script — e.g. `./src/sort-package-lists.sh` re-sorts the lists without touching anything else.
+`src/arch-sync.sh` is a thin orchestrator: it sources `src/common.sh` and then runs each step script in `src/` in order (as subprocesses). Each step is a standalone, independently runnable script — e.g. `./src/sort-package-lists.sh` re-sorts the lists without touching anything else.
 
 ## Running the script
 
 ```bash
-./arch-sync.sh
+./src/arch-sync.sh
 ```
 
 To run a single step on its own:
@@ -24,7 +24,7 @@ Prerequisites: `git`, `yay` (AUR helper). The script will error early if `yay` i
 
 ## Script layout
 
-- `arch-sync.sh` — orchestrator at the repo root; runs the step scripts in order.
+- `src/arch-sync.sh` — orchestrator; runs the other step scripts in `src/` in order.
 - `src/common.sh` — sourced library shared by every step: config-path variables, color/log helpers (`log_info` etc.), the entry parsers `parse_entry()` and `entry_name()`, and the non-root guard. Sourced, never executed directly.
 - `src/<step>.sh` — one script per step (see execution order below). Each sources `common.sh`, defines its function(s), and calls the function. Step-private helpers live with their step: `dedupe_internal`/`dedupe_install_against_remove` in `dedupe-package-lists.sh`, `sort_list_file` in `sort-package-lists.sh`.
 
@@ -47,7 +47,7 @@ All list files support `#` comments and blank lines. One entry per line. Entries
 
 ## Script execution order
 
-`arch-sync.sh` runs these step scripts in this order:
+`src/arch-sync.sh` runs these step scripts in this order:
 
 1. `update-databases.sh` — `yay -Sy` refreshes package databases
 2. `sync-mirrors.sh` — copy `mirrorlist` → `/etc/pacman.d/mirrorlist`

@@ -1,12 +1,12 @@
 #!/bin/bash
 # arch-sync.sh - Synchronize Arch Linux configuration across machines.
-# Orchestrator: runs each step script under src/ in order. Individual
+# Orchestrator: runs each step script in src/ in order. Individual
 # steps can also be run on their own (e.g. ./src/sort-package-lists.sh).
 
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-STEPS="${SCRIPT_DIR}/src"
+STEPS="${SCRIPT_DIR}"
 
 # Shared logging + root check
 source "${STEPS}/common.sh"

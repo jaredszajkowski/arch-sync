@@ -9,7 +9,7 @@ readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.13"
-# arch-sync is pure Bash (arch-sync.sh + src/*.sh); no Python dependencies
+# arch-sync is pure Bash (src/*.sh); no Python dependencies
 dependencies = []
 
 [project.urls]
