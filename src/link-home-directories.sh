@@ -10,6 +10,8 @@ link_home_directories() {
     fi
 
     log_info "Linking home directories to $SYNC_DIR..."
+    local sync_root
+    sync_root=$(realpath -m "$SYNC_DIR")
     while IFS= read -r line || [[ -n "$line" ]]; do
         entry=$(parse_entry "$line") || continue
 
@@ -18,6 +20,16 @@ link_home_directories() {
 
         if [[ -L "$target" ]]; then
             log_info "Already linked: ~/$entry"
+            continue
+        fi
+
+        # Guard: a parent of this entry is already linked into SYNC_DIR, so
+        # $target resolves inside the sync tree. Renaming/linking it would
+        # move the real synced data aside and create a self-referential link.
+        local resolved
+        resolved=$(realpath -m "$target")
+        if [[ "$resolved" == "$sync_root" || "$resolved" == "$sync_root"/* ]]; then
+            log_warn "Skipping ~/$entry — already inside $SYNC_DIR via a linked parent directory (remove this entry from $(basename "$HOME_DIRS"))"
             continue
         fi
 

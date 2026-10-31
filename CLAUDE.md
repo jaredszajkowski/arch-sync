@@ -55,8 +55,8 @@ All list files support `#` comments and blank lines. One entry per line. Entries
 4. `dedupe-package-lists.sh` — deduplicate the package list files (see Deduplication below) — runs before removal/installation so the rest of the run acts on the cleaned lists
 5. `remove-packages.sh` — remove listed packages (skips already-absent packages with a warning, does not abort)
 6. `remove-directories.sh` — remove listed directories (interactive confirmation)
-7. `link-home-directories.sh` — link home directories to `~/Cloud_Storage/Dropbox` (creates symlinks; renames existing dirs to `<dir>_old`)
-8. `link-home-files.sh` — link home files to `~/Cloud_Storage/Dropbox` (copies existing file into sync target if missing, then renames original to `<file>_old` and creates symlink)
+7. `link-home-directories.sh` — link home directories to `~/Cloud_Storage/Dropbox` (creates symlinks; renames existing dirs to `<dir>_old`; skips with a warning any entry that already resolves inside `$SYNC_DIR` through a linked parent, e.g. `Pictures/Screenshots` once `Pictures` is linked)
+8. `link-home-files.sh` — link home files to `~/Cloud_Storage/Dropbox` (copies existing file into sync target if missing, then renames original to `<file>_old` and creates symlink; same linked-parent guard as step 7)
 9. `install-packages.sh` — install official packages (skips already-installed)
 10. `install-aur-packages.sh` — install AUR packages (skips already-installed)
 11. `sort-package-lists.sh` — sort the package list files alphabetically (`packages-install.txt`, `packages-aur-install.txt`, `packages-remove.txt`) — leading comment header is preserved; inline comments and `@hostname` tags stay attached to their entry; blank lines within the body are dropped
