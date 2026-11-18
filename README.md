@@ -188,3 +188,7 @@ Licensed under the MIT License. See LICENSE for more information.
 ## Project status
 
 This project is under periodic active development. It is not yet ready for production use, but it is being used on my personal machines and I am happy to share it with others who may find it useful. I welcome contributions and suggestions for improvement.
+
+## Change Log
+
+See [CHANGELOG.md](CHANGELOG.md).
